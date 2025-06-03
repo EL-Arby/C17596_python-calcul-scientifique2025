@@ -1,145 +1,193 @@
-<<<<<<< HEAD
-# FD_2025
-=======
-Mini_Projet 
-Formation doctorale de l'Université de Nouakchott
+# Mini-projet : Classification de textes avec SVM
 
+## 1. Présentation
 
+Ce mini-projet a pour objectif de démontrer un pipeline complet de classification de textes en trois catégories (positif / négatif / neutre) en utilisant :
 
+* Des techniques de prétraitement de texte (nettoyage, tokenisation, TF-IDF).
+* Un algorithme de SVM linéaire implémenté « à la main ».
+* Un découpage en plusieurs notebooks pour séparer la définition du modèle, le développement en cours et la phase d’entraînement / évaluation.
 
-This readme file was generated on 2025-06-02 by Mohamed EL Moustapha CHRIF
+L’ensemble du code est écrit en Python, sans recourir à scikit-learn pour la partie SVM.
 
--
-#  GENERAL INFORMATION
--
+## 2. Structure du dépôt
 
-1. Title:  Mini-Project for Sentiment Analysis applied on HASSANIYA Dialect 
+```
+.
+├── README.md
+├── code/
+│   └── svm_model.py
+├── data/
+│   └── dataset.csv
+└── notebooks/
+    ├── encours.ipynb             # Notebook en cours de développement
+    ├── text_classification.ipynb # Notebook d’entraînement et d’évaluation
+    └── results.pdf               # Export PDF des résultats
+```
 
+* **`code/svm_model.py`**
+  Module contenant :
 
-2. contact
+  1. La fonction `tokenize(text)` pour nettoyer et découper le texte en tokens.
+  2. `build_vocabulary(texts, max_features)` et `compute_tf_idf(texts, vocab)` : construction du vocabulaire et calcul TF-IDF (forme creuse sous forme de dictionnaires).
+  3. La classe `LinearSVM` (implémentation Pegasos pour SVM binaire).
+  4. Les fonctions `train_svm(texts, labels, max_features, C, max_iter)` et `predict_svm(models, vocab, idf, texts)` pour l’entraînement multiclasses (one-vs-rest) et la prédiction.
 
-Name: Mohamed EL Moustapha CHRIF
-ORCID: 0000-0001-6107-8766
-Institution: Department of Computer Science, Faculty of Science and Technology, University of Nouakchott
-Email: arbimoustapha01@gmail.com
+* **`data/dataset.csv`**
+  Fichier CSV avec au minimum deux colonnes obligatoires :
 
-Institution: Department of Computer Science, Faculty of Sciences Dhar El Mahraz, Sidi Mohamed Ben Abdellah University
-Email: mohamedelmoustapha.chrif@usmba.ac.ma
-
-
-
+  * `text` : chaîne de caractères à classifier.
+  * `label` : étiquette associée (ex. `pos`, `neg`, `neutr`).
 
  
 
-4. Description of the dataset:
-This dataset represents the first publicly available version designed to address the lack of HASSANIYA dialect resources and advance research in the field of natural language processing.
+* **`notebooks/encours.ipynb`**
+  Notebook en cours de développement, rassemblant les expérimentations initiales, les idées de prétraitement avancé et les notes sur l’implémentation du modèle. À utiliser pour prototyper de nouvelles fonctionnalités avant de les intégrer dans le notebook principal.
 
-HASSANIYA is one of the standard Arabic, various, dialects. In addition to Mauritania, it is spoken along the Sahel region, within several states including Southern Morocco, Algeria, Mali, Niger, and some areas of Libya. Mauritania, however, could be considered as the cradle of this dialect compared to its neighboring countries. It is estimated that about 80% of the Mauritanian citizens speak HASSANIYA in their daily life.  
-The Mauritanian version of HASSANIYA is spoken with different accents, but each is slightly distinct from one another. The Eastern, Western and Northen citizens’ accents and style are still recognizable despite approximately the over 98% similarities in everything between the different regions. Sometimes those differences melt away, in case the speaker is grown up in one of the big cities like Nouakchott.
- Like any other language or dialect, the cross-culture influence such as the number of borrowed words, neighborhood, and borders with none Arab states, etc. has affected the dialect at different levels that might include: phonology, morphology, semantics and syntax. Therefore, it is important to emphasize that this diversity shows one of the complexities of the HASSANIYA dialect, and so will be the nature of any research that targets this dialect. Subsequently, the data could help data scientist researchers fill the gap in natural language models specific to this dialect.
+* **`notebooks/text_classification.ipynb`**
+  Notebook principal d’expérimentation, qui :
 
-The dataset represents the first and only data available in the HASSANIYA dialect. It consists of 1851 records extracted from relevant comments published on Facebook.
+  1. Exécute en première cellule :
 
+     ```python
+     %run ../code/svm_model.py
+     ```
 
-5. Date of data collection: The dataset was gathered in two phases: a preliminary collection in June–July 2021, followed by a more extensive compilation spanning March 2023 – August 2024.
+     pour importer toutes les définitions (`tokenize`, `train_svm`, `predict_svm`, etc.).
+  2. Importe `pandas`, `random` et `Counter` pour gérer le dataset et l’évaluation.
+  3. Charge `data/dataset.csv`, mélange aléatoirement et sépare en jeu d’entraînement (80 %) et jeu de test (20 %).
+  4. Appelle `train_svm(texts_train, labels_train, max_features=5000, C=1.0, max_iter=5000)` pour obtenir :
 
+     * `models` (dictionnaire de trois objets `LinearSVM`).
+     * `idf` (dictionnaire indice→valeur idf).
+  5. Appelle `predict_svm(models, vocab, idf, texts_test)` pour générer les prédictions.
+  6. Calcule manuellement l’accuracy, la matrice de confusion et un rapport de classification (précision / rappel / F1-score / support) sans scikit-learn.
+  
 
--
-# SHARING/ACCESS INFORMATION
--
+* **`notebooks/results.pdf`**
+  Export PDF du notebook `text_classification.ipynb` montrant :
 
-
-1. Data sources: Social media, notably Facebook pages.
-
-2. Dataset citation: El ARBY, Med El Moustapha (2025), “HASSANIYA-DTCD: A new Dataset for Benchmarking Text Classification Tasks on HASSANIYA Dialect”, Mendeley Data, V1, doi: 10.17632/r5k9ktwr4g.1
-
-https://data.mendeley.com/datasets/m2swkr2bhx/1
-
-
-
--
-# DATA & FILE OVERVIEW
--
-
-Filename: TD_TF
-Description: contains the correction of TD and TP. 
-
-Filename: Mini_Projet
-Description: contains a Python script used to implement the SVM technique to classify HASSANIYA data into three categories: positive, negative and neutral.
-
-Filename: hassaniya-preprocessing
-format: (.ipynb)
-Description: contains the script(python) used to preprocess the data, such as removing stop words, punctuation, and duplication.
+  * La répartition des labels dans le dataset.
+  * Les tailles respectives des jeux train/test.
+  * L’accuracy finale.
+  * La matrice de confusion.
+  * Le rapport de classification pour chaque classe.
 
 
+## 3. Prérequis
+
+* **Python 3.7+**
+* Bibliothèques Python :
+
+  * `pandas` (pour charger et manipuler le dataset)
+  * `numpy` (optionnel, si vous souhaitez étendre ou tracer des graphes)
+* Aucune dépendance à scikit-learn : tout le code SVM est implémenté “à la main” dans `svm_model.py`.
+
+## 4. Installation et configuration
+
+1. **Cloner le dépôt GitHub**
+
+   ```bash
+   git clone https://github.com/EL-Arby/C17596_python-calcul-scientifique2025.git
+   cd C17596_python-calcul-scientifique2025
+   ```
+
+2. **Créer un environnement virtuel (fortement recommandé)**
+
+   ```bash
+   python -m venv venv
+   ```
+
+   * Sous Linux/macOS :
+
+     ```bash
+     source venv/bin/activate
+     ```
+   * Sous Windows (PowerShell) :
+
+     ```powershell
+     .\venv\Scripts\Activate.ps1
+     ```
+
+3. **Installer les dépendances**
+
+   ```bash
+   pip install pandas
+   ```
+
+   (Si vous souhaitez utiliser NumPy ou Matplotlib pour vos propres extensions, installez-les également.)
+
+4. **Vérifier la structure du dépôt**
+
+   ```
+   .
+   ├── README.md
+   ├── code/
+   │   └── svm_model.py
+   ├── data/
+   │   └── dataset.csv
+   └── notebooks/
+       ├── encours.ipynb
+       ├── text_classification.ipynb
+       └── results.pdf
+   ```
+
+## 5. Utilisation
+
+### 5.1. Exécuter le notebook d’entraînement
+
+1. **Lancer Jupyter Notebook**
+
+   ```bash
+   jupyter notebook
 
 
--
-Data-specific information for: Mini_project
--
+### 5.2. Utilisation du notebook en cours (`encours.ipynb`)
 
-1.  Number of instances: 1851
+* **`notebooks/encours.ipynb`** est dédié aux expérimentations initiales et aux idées de prétraitement avancé.
+* On y teste notamment :
 
-2.  Number of rows: 1853
+  * Le nettoyage de tokens (stop-words, lemmatisation).
+  * L’ajout d’ngrams (bi-grams/tri-grams) dans le TF-IDF.
+  * Des variantes d’algorithmes (régression logistique, Naïve Bayes).
+* Une fois validées, ces nouveautés pourront être intégrées dans le notebook principal (`text_classification.ipynb`).
 
-4.  Number of classes: 3
-	• Positive
-	• Negative
-	• Neutral
+### 5.3. Lecture du rapport PDF
 
-5.  Attribute list: 
-	
-	•  id: a unique identifier for each comment
-	•  annotation: Indicates whether the entry has been annotated (1) or not (0)
-	•  created_at: the timestamp when the comment was stored
-	•  text: the full content of the comment
-	•  annotation_result: Assigned sentiment label (positive, negative, or neutral)
+* Ouvrez `notebooks/results.pdf` pour consulter les tableaux et graphiques générés lors de l’exécution du notebook `text_classification.ipynb`.
 
+## 6. Détails techniques
 
-# METHODOLOGICAL INFORMATION
+### 6.1. Prétraitement de texte
 
--
-Description of methods used for data preparation:
--
+* **`tokenize(text)`** :
 
-The dataset preparation process proceeded through the following key steps:
+  * Met la chaîne en minuscules.
+  * Remplace tout caractère non alphanumérique par un espace.
+  * Sépare sur les espaces et retourne la liste des tokens non vides.
 
-1. Data collection: We gathered high-quality data from multiple sources, restricting our selection to the Facebook pages of prominent individuals—bloggers, public officials, and political leaders (e.g., presidential and ministerial pages)—to ensure relevance, credibility, and topical diversity. 
+* **`build_vocabulary(texts, max_features)`** :
+
+  * Calcule la fréquence de document (nombre de documents contenant chaque token).
+  * Construit un vocabulaire limité aux `max_features` tokens les plus fréquents (par fréquence de document).
 
 
-2. Record verification: We reviewed each entry individually to confirm that its content was both pertinent and objective. 
+## 7. Extensions possibles
+
+1. **Modifier le paramètre `max_features`** dans `train_svm` pour explorer l’impact de la taille du vocabulaire.
+2. **Intégrer des n-grams** (bi-grams, tri-grams) dans le calcul TF-IDF.
+3. **Ajouter un module de nettoyage plus avancé** :
+
+   * Suppression des stop-words (via liste personnalisée).
+   * Lemmatisation ou stemming (spaCy, NLTK).
 
 
-3. Annotation: The research team—leveraging its expertise in the HASSANIYA dialect and regional sociolinguistic norms—guided the annotation process; ambiguous cases were resolved by consulting Modern Standard Arabic as a neutral reference, Additionally, annotators represented two distinct regional backgrounds to ensure diverse perspectives during the annotation process.
+## 8. Auteur
 
+**EL-Arby**
+Miniproject réalisé dans le cadre du cours “Python pour le calcul scientifique” (année 2025).
 
-4.  Pre-processing is an important step in preparing data for analysis. It consists of data cleaning, transformation, and integration. The necessary library to clean data was dedicated to removing non-Arabic words, spaces, punctuation, stopwords, etc.
-The library needed for data cleaning was used to: clean and normalize text, remove repetitions, remove non-Arabic, and remove Hassaniya_stopwords listed in the attached file (see attached file in IPython Notebook format ).
+---
 
-
--
-# Software-specific information needed to analyze the data
--
-
-
-
-1. The packages and libraries needed to run scripts are listed in the attached file (IPython Notebook format ).
-
-
-2. Environmental/Tools: 
-	- Kaggle: We used the Kaggle platform to implement our experiment.  
-	- Web scraper used to gather comments from Facebook pages.
-	- Label Studio is used to annotate each entry.
-2. Library: 
-	- Numpy
-	 - Pandas
-	 - Sklearn
-	 - nltk
-	
- 
--
-Acknowledgements
--
-
-This README file template is adapted from the following source: https://data.research.cornell.edu/content/readme#bestpractices
->>>>>>> 34cb976 (first commit)
+**Licence MIT**
+Ce projet est mis à disposition sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
